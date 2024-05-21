@@ -10,6 +10,13 @@ const infixEval = (str, regex) =>
     infixToFunction[operator](parseFloat(arg1), parseFloat(arg2))
   );
 
+const highPrecedence = (str) => {
+  const regex = /([\d.]+)([*\/])([\d.]+)/;
+  const str2 = infixEval(str, regex);
+  return str2 === str ? str : highPrecedence(str2);
+};
+console.log(highPrecedence("5*3"));
+
 const isEven = (num) => num % 2 === 0;
 const sum = (nums) => nums.reduce((acc, el) => acc + el, 0);
 const average = (nums) => sum(nums) / nums.length;
@@ -23,7 +30,23 @@ const median = (nums) => {
     : sorted[Math.ceil(middle)];
 };
 
-const spreadsheetFunctions = { sum, average, median };
+const spreadsheetFunctions = { sum, average, median, even: nums => nums.filter(isEven) };
+
+const applyFunction = (str) => {
+  const noHigh = highPrecedence(str);
+  const infix = /([\d.]+)([+-])([\d.]+)/;
+  const str2 = infixEval(noHigh, infix);
+  const functionCall = /([a-z0-9]*)\(([0-9., ]*)\)(?!.*\()/i;
+  const toNumberList = (args) => args.split(",").map(parseFloat);
+  const apply = (fn, args) =>
+    spreadsheetFunctions[fn.toLowerCase()](toNumberList(args));
+
+  return str2.replace(functionCall, (match, fn, args) =>
+    spreadsheetFunctions.hasOwnProperty(fn.toLowerCase())
+      ? apply(fn, args)
+      : match
+  );
+};
 
 const range = (start, end) =>
   Array(end - start + 1)
@@ -52,6 +75,10 @@ const evalFormula = (x, cells) => {
   const cellExpanded = rangeExpanded.replace(cellRegex, (match) =>
     idToText(match.toUpperCase())
   );
+  const functionExpanded = applyFunction(cellExpanded);
+  return functionExpanded === x
+    ? functionExpanded
+    : evalFormula(functionExpanded, cells);
 };
 
 window.onload = () => {
@@ -81,5 +108,9 @@ const update = (event) => {
   const element = event.target;
   const value = element.value.replace(/\s/g, "");
   if (!value.incudes(element.id) && value.startsWith("=")) {
+    element.value = evalFormula(
+      value.slice(1),
+      Array.from(document.getElementById("container").children)
+    );
   }
 };
