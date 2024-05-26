@@ -30,7 +30,38 @@ const median = (nums) => {
     : sorted[Math.ceil(middle)];
 };
 
-const spreadsheetFunctions = { sum, average, median, even: nums => nums.filter(isEven) };
+const spreadsheetFunctions = {
+  "": (nums) => nums,
+  sum,
+  average,
+  median,
+  even: (nums) => nums.filter(isEven),
+  someeven: (nums) => nums.some(isEven),
+  firsttwo: (nums) => nums.slice(0, 2),
+  lasttwo: (nums) => nums.slice(-2),
+  has2: (nums) => nums.includes(2),
+  increment: (nums) => nums.map((num) => num + 1),
+  everyeven: (nums) => nums.every(isEven),
+  // random: nums => {
+  //   if (nums.length < 2) {
+  //     throw new Error("Array must contain at least two numbers");
+  //   }
+  //   const [num1, num2] = nums.slice(0, 2);
+  //   const min = Math.min(num1, num2);
+  //   const max = num1 + num2;
+  //   return Math.floor(Math.random() * (max - min)) + min;
+  // }
+  random: ([x, y]) => Math.floor(Math.random() * y + x),
+  // range: ([start, end]) => {
+  //   let result = [];
+  //   for (let i = start; i <= end; i++) {
+  //     result.push(i);
+  //   }
+  //   return result;
+  // }
+  range: (nums) => range(...nums),
+  nodupes: (nums) => [...new Set(nums)],
+};
 
 const applyFunction = (str) => {
   const noHigh = highPrecedence(str);
